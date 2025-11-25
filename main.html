@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Movie Recommender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: #f5f5f5;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .movie-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: slideIn 0.5s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .movie-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .movie-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .movie-info span {
+            background: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .rating {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .preferences-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .genre-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chip:hover {
+            border-color: #667eea;
+        }
+
+        .chip.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .user-profile {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-message {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .star {
+            font-size: 2em;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.filled {
+            color: #f39c12;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .movie-info {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 AI Movie Recommender</h1>
+            <p>Discover your next favorite movie with AI-powered recommendations</p>
+        </div>
+
+        <div class="main-content">
+            <div id="userProfileSection"></div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('setup')">👤 Setup Profile</button>
+                <button class="tab" onclick="switchTab('discover')">🔍 Discover Movies</button>
+                <button class="tab" onclick="switchTab('similar')">🎯 Similar Movies</button>
+                <button class="tab" onclick="switchTab('rate')">⭐ Rate Movies</button>
+                <button class="tab" onclick="switchTab('browse')">📚 Browse All</button>
+            </div>
+
+            <!-- Setup Profile Tab -->
+            <div id="setup" class="tab-content active">
+                <h2 style="margin-bottom: 20px; color: #333;">Tell us about yourself</h2>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Favorite Genres (Select all that apply)</label>
+                    <div class="genre-chips" id="genreSelection"></div>
+                </div>
+                <div class="form-group">
+                    <label>Favorite Directors</label>
+                    <input type="text" id="favoriteDirectors" placeholder="e.g., Christopher Nolan, Martin Scorsese">
+                </div>
+                <button class="btn" onclick="saveProfile()">Save Profile & Get Started</button>
+            </div>
+
+            <!-- Discover Movies Tab -->
+            <div id="discover" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #333;">Discover Personalized Recommendations</h2>
+                <div class="preferences-section">
+                    <label>Filter by Genre</label>
+                    <select id="discoverGenre">
+                        <option value="">All Genres</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Thriller">Thriller</option>
+                        <option value="Action">Action</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Crime">Crime</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="discoverMovies()">Get Recommendations</button>
+                <div id="discoverResults" class="results"></div>
+            </div>
+
+            <!-- Similar Movies Tab -->
+            <div id="similar" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #333;">Find Similar Movies</h2>
+                <div class="form-group">
+                    <label>Select a movie you liked</label>
+                    <select id="similarMovieSelect"></select>
+                </div>
+                <button class="btn" onclick="findSimilar()">Find Similar Movies</button>
+                <div id="similarResults" class="results"></div>
+            </div>
+
+            <!-- Rate Movies Tab -->
+            <div id="rate" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #333;">Rate Movies You've Watched</h2>
+                <div class="form-group">
+                    <label>Select a movie</label>
+                    <select id="rateMovieSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Your Rating</label>
+                    <div class="rating-input" id="starRating"></div>
+                </div>
+                <button class="btn" onclick="submitRating()">Submit Rating</button>
+                <div id="rateResults" class="results"></div>
+            </div>
+
+            <!-- Browse All Tab -->
+            <div id="browse" class="tab-content">
+                <h2 style="margin-bottom: 20px; color: #333;">Browse All Movies</h2>
+                <div class="form-group">
+                    <label>Search</label>
+                    <input type="text" id="searchInput" placeholder="Search by title, director, or keyword...">
+                </div>
+                <button class="btn" onclick="searchMovies()">Search</button>
+                <div id="browseResults" class="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Movie Database
+        const movies = [
+            { id: 1, title: 'The Shawshank Redemption', genre: 'Drama', director: 'Frank Darabont', year: 1994, rating: 9.3, keywords: 'prison friendship hope redemption' },
+            { id: 2, title: 'The Godfather', genre: 'Crime Drama', director: 'Francis Ford Coppola', year: 1972, rating: 9.2, keywords: 'mafia family power loyalty' },
+            { id: 3, title: 'The Dark Knight', genre: 'Action Thriller', director: 'Christopher Nolan', year: 2008, rating: 9.0, keywords: 'batman joker chaos justice hero' },
+            { id: 4, title: 'Pulp Fiction', genre: 'Crime Drama', director: 'Quentin Tarantino', year: 1994, rating: 8.9, keywords: 'crime nonlinear dialogue coolness' },
+            { id: 5, title: 'Forrest Gump', genre: 'Drama', director: 'Robert Zemeckis', year: 1994, rating: 8.8, keywords: 'life journey innocence america' },
+            { id: 6, title: 'Inception', genre: 'Sci-Fi Thriller', director: 'Christopher Nolan', year: 2010, rating: 8.8, keywords: 'dreams reality heist mindbending' },
+            { id: 7, title: 'The Matrix', genre: 'Sci-Fi Action', director: 'Wachowskis', year: 1999, rating: 8.7, keywords: 'simulation reality choice freedom' },
+            { id: 8, title: 'Goodfellas', genre: 'Crime Drama', director: 'Martin Scorsese', year: 1990, rating: 8.7, keywords: 'mafia crime loyalty violence' },
+            { id: 9, title: 'The Silence of the Lambs', genre: 'Thriller', director: 'Jonathan Demme', year: 1991, rating: 8.6, keywords: 'serial killer FBI psychology' },
+            { id: 10, title: 'Se7en', genre: 'Crime Thriller', director: 'David Fincher', year: 1995, rating: 8.6, keywords: 'detective serial killer dark twisted' },
+            { id: 11, title: 'The Prestige', genre: 'Mystery Thriller', director: 'Christopher Nolan', year: 2006, rating: 8.5, keywords: 'magic rivalry obsession sacrifice' },
+            { id: 12, title: 'Memento', genre: 'Mystery Thriller', director: 'Christopher Nolan', year: 2000, rating: 8.4, keywords: 'memory revenge puzzle nonlinear' },
+            { id: 13, title: 'Interstellar', genre: 'Sci-Fi Drama', director: 'Christopher Nolan', year: 2014, rating: 8.7, keywords: 'space time love relativity wormhole' },
+            { id: 14, title: 'The Departed', genre: 'Crime Thriller', director: 'Martin Scorsese', year: 2006, rating: 8.5, keywords: 'undercover police betrayal boston' },
+            { id: 15, title: 'Fight Club', genre: 'Drama', director: 'David Fincher', year: 1999, rating: 8.8, keywords: 'consumerism identity anarchism twist' },
+            { id: 16, title: 'The Green Mile', genre: 'Drama', director: 'Frank Darabont', year: 1999, rating: 8.6, keywords: 'death row prison supernatural miracle' },
+            { id: 17, title: 'Gladiator', genre: 'Action Drama', director: 'Ridley Scott', year: 2000, rating: 8.5, keywords: 'rome gladiator revenge honor empire' },
+            { id: 18, title: 'The Usual Suspects', genre: 'Mystery Thriller', director: 'Bryan Singer', year: 1995, rating: 8.5, keywords: 'crime twist mystery suspects' },
+            { id: 19, title: 'American Beauty', genre: 'Drama', director: 'Sam Mendes', year: 1999, rating: 8.3, keywords: 'suburban midlife crisis beauty' },
+            { id: 20, title: 'Parasite', genre: 'Thriller Drama', director: 'Bong Joon-ho', year: 2019, rating: 8.5, keywords: 'class inequality family thriller korean' }
+        ];
+
+        let userProfile = {
+            name: '',
+            genres: [],
+            directors: '',
+            ratings: {}
+        };
+
+        const genres = ['Drama', 'Thriller', 'Action', 'Sci-Fi', 'Crime', 'Mystery'];
+
+        // Initialize
+        function init() {
+            populateGenreChips();
+            populateMovieSelects();
+            createStarRating();
+            loadUserProfile();
+        }
+
+        function populateGenreChips() {
+            const container = document.getElementById('genreSelection');
+            genres.forEach(genre => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.textContent = genre;
+                chip.onclick = () => toggleGenre(chip, genre);
+                container.appendChild(chip);
+            });
+        }
+
+        function toggleGenre(chip, genre) {
+            chip.classList.toggle('selected');
+            const index = userProfile.genres.indexOf(genre);
+            if (index > -1) {
+                userProfile.genres.splice(index, 1);
+            } else {
+                userProfile.genres.push(genre);
+            }
+        }
+
+        function populateMovieSelects() {
+            const selects = ['similarMovieSelect', 'rateMovieSelect'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">-- Select a movie --</option>';
+                movies.forEach(movie => {
+                    const option = document.createElement('option');
+                    option.value = movie.id;
+                    option.textContent = `${movie.title} (${movie.year})`;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function createStarRating() {
+            const container = document.getElementById('starRating');
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.className = 'star';
+                star.textContent = '★';
+                star.onclick = () => setRating(i);
+                container.appendChild(star);
+            }
+        }
+
+        function setRating(rating) {
+            userProfile.currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.classList.toggle('filled', index < rating);
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('userName').value;
+            const directors = document.getElementById('favoriteDirectors').value;
+
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            userProfile.name = name;
+            userProfile.directors = directors;
+
+            localStorage.setItem('movieUserProfile', JSON.stringify(userProfile));
+
+            updateUserProfileDisplay();
+            switchTab('discover');
+            document.querySelector('[onclick="switchTab(\'discover\')"]').classList.add('active');
+            alert('Profile saved! Let\'s find some great movies for you! 🎬');
+        }
+
+        function loadUserProfile() {
+            const saved = localStorage.getItem('movieUserProfile');
+            if (saved) {
+                userProfile = JSON.parse(saved);
+                updateUserProfileDisplay();
+            }
+        }
+
+        function updateUserProfileDisplay() {
+            const section = document.getElementById('userProfileSection');
+            if (userProfile.name) {
+                section.innerHTML = `
+                    <div class="user-profile">
+                        <div class="welcome-message">Welcome back, ${userProfile.name}! 👋</div>
+                        <div>Favorite Genres: ${userProfile.genres.join(', ') || 'None selected'}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function calculateSimilarity(movie1, movie2) {
+            let score = 0;
+            if (movie1.director === movie2.director) score += 3;
+            if (movie1.genre === movie2.genre) score += 2;
+
+            const keywords1 = movie1.keywords.split(' ');
+            const keywords2 = movie2.keywords.split(' ');
+            const commonKeywords = keywords1.filter(k => keywords2.includes(k));
+            score += commonKeywords.length;
+
+            return score;
+        }
+
+        function discoverMovies() {
+            const genreFilter = document.getElementById('discoverGenre').value;
+            const resultsDiv = document.getElementById('discoverResults');
+
+            let filtered = movies;
+            if (genreFilter) {
+                filtered = movies.filter(m => m.genre.includes(genreFilter));
+            }
+
+            // Sort by rating and user preferences
+            filtered = filtered.sort((a, b) => {
+                let scoreA = a.rating;
+                let scoreB = b.rating;
+
+                if (userProfile.genres.some(g => a.genre.includes(g))) scoreA += 1;
+                if (userProfile.genres.some(g => b.genre.includes(g))) scoreB += 1;
+
+                return scoreB - scoreA;
+            });
+
+            displayResults(filtered.slice(0, 8), resultsDiv);
+        }
+
+        function findSimilar() {
+            const movieId = parseInt(document.getElementById('similarMovieSelect').value);
+            const resultsDiv = document.getElementById('similarResults');
+
+            if (!movieId) {
+                alert('Please select a movie!');
+                return;
+            }
+
+            const selectedMovie = movies.find(m => m.id === movieId);
+            const similarities = movies
+                .filter(m => m.id !== movieId)
+                .map(m => ({
+                    movie: m,
+                    similarity: calculateSimilarity(selectedMovie, m)
+                }))
+                .sort((a, b) => b.similarity - a.similarity)
+                .slice(0, 5)
+                .map(s => s.movie);
+
+            displayResults(similarities, resultsDiv);
+        }
+
+        function submitRating() {
+            const movieId = parseInt(document.getElementById('rateMovieSelect').value);
+            const rating = userProfile.currentRating;
+
+            if (!movieId || !rating) {
+                alert('Please select a movie and rating!');
+                return;
+            }
+
+            const movie = movies.find(m => m.id === movieId);
+            userProfile.ratings[movieId] = rating;
+            localStorage.setItem('movieUserProfile', JSON.stringify(userProfile));
+
+            document.getElementById('rateResults').innerHTML = `
+                <div class="movie-card">
+                    <div class="movie-title">✅ Rating Submitted!</div>
+                    <div class="movie-info">
+                        <span>Movie: ${movie.title}</span>
+                        <span class="rating">Your Rating: ${'★'.repeat(rating)}${'☆'.repeat(5-rating)}</span>
+                    </div>
+                </div>
+            `;
+
+            // Reset
+            document.getElementById('rateMovieSelect').value = '';
+            setRating(0);
+        }
+
+        function searchMovies() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsDiv = document.getElementById('browseResults');
+
+            if (!query) {
+                displayResults(movies, resultsDiv);
+                return;
+            }
+
+            const results = movies.filter(m =>
+                m.title.toLowerCase().includes(query) ||
+                m.director.toLowerCase().includes(query) ||
+                m.genre.toLowerCase().includes(query) ||
+                m.keywords.toLowerCase().includes(query)
+            );
+
+            displayResults(results, resultsDiv);
+        }
+
+        function displayResults(movieList, container) {
+            if (movieList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                        <h3>No movies found</h3>
+                        <p>Try adjusting your search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = movieList.map(movie => `
+                <div class="movie-card">
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-info">
+                        <span>🎭 ${movie.genre}</span>
+                        <span>🎬 ${movie.director}</span>
+                        <span>📅 ${movie.year}</span>
+                        <span class="rating">⭐ ${movie.rating}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
