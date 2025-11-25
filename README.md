@@ -194,18 +194,10 @@ movie-recommendation-system/
 ├── requirements.txt           # Python dependencies
 ├── README.md                  # This file
 │
-├── data/                      # (Optional) Additional movie datasets
-│   └── movies_extended.csv
-│
-├── screenshots/               # Demo screenshots
-│   ├── web_interface.png
-│   └── cli_output.png
-│
-└── docs/                      # Additional documentation
-    ├── API.md
-    └── ALGORITHMS.md
+└── screenshots/               # Demo screenshots
+   ├── web_interface.png
+   └── cli_output.png
 ```
-
 ## 🛠️ Technologies Used
 
 ### Python Version
@@ -295,11 +287,9 @@ in the Software without restriction...
 ## 📧 Contact
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- LinkedIn: [Your Name](https://linkedin.com/in/yourprofile)
-
-**Project Link:** [https://github.com/yourusername/movie-recommendation-system](https://github.com/yourusername/movie-recommendation-system)
+- GitHub: [@HirthikBalaji](https://github.com/HirthikBalaji)
+- Email: hirthikbalaji2006@gmail.com
+- LinkedIn: [Hirthik Balaji C](https://www.linkedin.com/in/hirthik-balaji-c-519b77229/)
 
 ## 🙏 Acknowledgments
 
