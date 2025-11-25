@@ -314,10 +314,10 @@ in the Software without restriction...
 ## 📸 Screenshots
 
 ### Web Interface
-*Add your screenshots here*
+![web_interface.png](https://github.com/HirthikBalaji/MovieRecommendationSystem/blob/master/screenshots/web_interface.png?raw=true)
 
 ### Python CLI
-*Add your CLI screenshots here*
+![cli_output.png](https://github.com/HirthikBalaji/MovieRecommendationSystem/blob/master/screenshots/cli_output.png?raw=true)
 
 ---
 
